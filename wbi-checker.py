@@ -54,8 +54,7 @@ for i, url in enumerate(urls):
 
 
         arr = np.asarray(bytearray(response.read()), dtype=np.uint8)
-        st.write(arr)
-        img = cv2.imdecode(arr, -1)
+
 
         if len(img.shape) == 3:
             # If the image is in RGB format
@@ -81,11 +80,18 @@ for i, url in enumerate(urls):
 
 df = pd.DataFrame(output, columns=['url', 'image_link', 'white_px_count', 'wbi', 'error', 'image_size', 'white_pix_percentage'])
 
-st.dataframe(
+df = pd.DataFrame(output, columns=['url', 'image_link', 'white_px_count', 'wbi', 'error', 'image_size', 'white_pix_percentage'])
+
+st.data_editor(
     df,
-    width=1000,
-    height=500,
+    column_config={
+        "url": st.column_config.ImageColumn(
+            "Preview Image", help="Streamlit app preview screenshots"
+        )
+    },
+    hide_index=True,
 )
+
 
 # Button to download the DataFrame
 def convert_df(df):
