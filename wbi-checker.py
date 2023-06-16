@@ -46,9 +46,20 @@ for i, url in enumerate(urls):
         arr = np.asarray(bytearray(response.read()), dtype=np.uint8)
         img = cv2.imdecode(arr, -1)
 
-        n_white_pix = np.sum(np.all(img == [255, 255, 255], axis=-1))
+
+        arr = np.asarray(bytearray(response.read()), dtype=np.uint8)
+        img = cv2.imdecode(arr, -1)
+
+        if len(img.shape) == 3:
+            # If the image is in RGB format
+            n_white_pix = np.sum(np.all(img == [255, 255, 255], axis=-1))
+        else:
+            # If the image is in grayscale format
+            n_white_pix = np.sum(img == 255)
+
         total_pix = img.shape[0] * img.shape[1]  # Total number of pixels in the image
         white_pix_percentage = (n_white_pix / total_pix) * 100  # Percentage of white pixels
+
 
         wbi = 1 if white_pix_percentage > threshold else 0
         the_result = {"url": url, "image_link": url, "white_px_count": n_white_pix, "wbi": wbi, "error": "", "image_size": image_size, "white_pix_percentage": white_pix_percentage}
