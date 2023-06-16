@@ -1,5 +1,4 @@
 import cv2
-from cv2 import imdecode
 import numpy as np
 import urllib.request
 import pandas as pd
@@ -7,6 +6,8 @@ import time
 import base64
 from urllib.error import HTTPError
 import streamlit as st
+from PIL import Image
+import io
 
 st.set_page_config(layout="wide")
 
@@ -41,14 +42,19 @@ for i, url in enumerate(urls):
     try:
         req = urllib.request.Request(url, headers=headers)
         response = urllib.request.urlopen(req)
-
+        mime = response.headers.get('Content-Type')
         image_size = response.headers['Content-Length']  # Get the image size from the headers
 
-        arr = np.asarray(bytearray(response.read()), dtype=np.uint8)
-        img = cv2.imdecode(arr, -1)
+        if not mime or not mime.startswith('image'):
+            raise ValueError(f"URL {url} does not point to an image")
+
+        image = Image.open(io.BytesIO(response.read()))
+        img = np.array(image)
 
 
+
         arr = np.asarray(bytearray(response.read()), dtype=np.uint8)
+        st.write(arr)
         img = cv2.imdecode(arr, -1)
 
         if len(img.shape) == 3:
