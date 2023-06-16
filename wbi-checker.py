@@ -9,7 +9,7 @@ import streamlit as st
 
 st.set_page_config(layout="wide")
 
-threshold = 80
+threshold = 40
 
 st.title('White Background Image Checker')
 
