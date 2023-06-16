@@ -42,33 +42,27 @@ for i, url in enumerate(urls):
     try:
         req = urllib.request.Request(url, headers=headers)
         response = urllib.request.urlopen(req)
-        mime = response.headers.get('Content-Type')
-        image_size = response.headers['Content-Length']  # Get the image size from the headers
 
-        if not mime or not mime.startswith('image'):
-            raise ValueError(f"URL {url} does not point to an image")
+        # Convert to a PIL Image
+        image = Image.open(response)
 
-        image = Image.open(io.BytesIO(response.read()))
+        # Check if file format in URL matches actual file format
+        url_file_extension = url.rsplit('.', 1)[-1].upper()
+        image_format = 'JPEG' if image.format == 'JPG' else image.format
+        url_file_extension = 'JPEG' if url_file_extension == 'JPG' else url_file_extension
+
+        if image_format != url_file_extension:
+            raise ValueError(f"Image format {image.format} does not match file extension in URL ({url_file_extension})")
+
+        # Convert PIL Image to numpy array
         img = np.array(image)
 
-
-
-        arr = np.asarray(bytearray(response.read()), dtype=np.uint8)
-
-
-        if len(img.shape) == 3:
-            # If the image is in RGB format
-            n_white_pix = np.sum(np.all(img == [255, 255, 255], axis=-1))
-        else:
-            # If the image is in grayscale format
-            n_white_pix = np.sum(img == 255)
-
-        total_pix = img.shape[0] * img.shape[1]  # Total number of pixels in the image
-        white_pix_percentage = (n_white_pix / total_pix) * 100  # Percentage of white pixels
-
-
-        wbi = 1 if white_pix_percentage > threshold else 0
-        the_result = {"url": url, "image_link": url, "white_px_count": n_white_pix, "wbi": wbi, "error": "", "image_size": image_size, "white_pix_percentage": white_pix_percentage}
+        # Rest of your code...
+    except ValueError as ve:
+        error_message = f"ValueError occurred for URL: {url}. Error: {str(ve)}"
+        print(error_message)
+        the_result = {"url": url, "image_link": url, "white_px_count": 0, "wbi": 0, "error": error_message,
+                      "image_size": "N/A", "white_pix_percentage": "N/A"}
         output.append(the_result)
     except HTTPError as e:
         error_message = f"HTTPError occurred for URL: {url}. Error code: {e.code}"
