@@ -17,6 +17,11 @@ st.title('White Background Image Checker')
 
 st.write('This app is designed to take a list of image URLs in a single column csv, and determined whether the images have a white background or not. It counts the white pixels in the image and returns a % of white pixels. Useful for e-commerce product images where some products may be missing a white background image and you need a way to find which images need updating without checking them all manually.')
 
+st.markdown('* Checks for broken images \n * Checks for mismatched formats (e.g. if a .jpg URL is really a .png) \n * Checks if a white background \n * Allows re-checking if you get rate-limited \n * Displays image height and width in px')
+
+
+
+
 # Upload CSV file
 uploaded_file = st.file_uploader("Choose a CSV file - column 1 should be a list of image URLs", type="csv")
 if uploaded_file is not None:
@@ -54,10 +59,32 @@ for i, url in enumerate(urls):
         if image_format != url_file_extension:
             raise ValueError(f"Image format {image.format} does not match file extension in URL ({url_file_extension})")
 
+
         # Convert PIL Image to numpy array
         img = np.array(image)
 
-        # Rest of your code...
+        # Calculate the percentage of white pixels
+        if len(img.shape) == 3:
+            # If the image is in RGB format
+            n_white_pix = np.sum(np.all(img == [255, 255, 255], axis=-1))
+        else:
+            # If the image is in grayscale format
+            n_white_pix = np.sum(img == 255)
+
+        total_pix = img.shape[0] * img.shape[1]  # Total number of pixels in the image
+        white_pix_percentage = round((n_white_pix / total_pix) * 100,1)  # Percentage of white pixels
+
+        # Append result to output list
+        output.append({
+            "url": url,
+            "image_link": url,
+            "white_px_count": n_white_pix,
+            "wbi": white_pix_percentage,
+            "error": "",
+            "image_width": image.size[0],
+            "image_height": image.size[1],
+            "white_pix_percentage": white_pix_percentage})
+
     except ValueError as ve:
         error_message = f"ValueError occurred for URL: {url}. Error: {str(ve)}"
         print(error_message)
@@ -72,9 +99,8 @@ for i, url in enumerate(urls):
         if e.code in [429, 403]:
             failed_images.append(url)
 
-df = pd.DataFrame(output, columns=['url', 'image_link', 'white_px_count', 'wbi', 'error', 'image_size', 'white_pix_percentage'])
+df = pd.DataFrame(output, columns=['url', 'image_link', 'white_px_count', 'wbi', 'error', 'image_width', 'image_height', 'white_pix_percentage'])
 
-df = pd.DataFrame(output, columns=['url', 'image_link', 'white_px_count', 'wbi', 'error', 'image_size', 'white_pix_percentage'])
 
 st.data_editor(
     df,
