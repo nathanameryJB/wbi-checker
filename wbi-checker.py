@@ -98,7 +98,19 @@ for i, url in enumerate(urls):
         output.append(the_result)
         if e.code in [429, 403]:
             failed_images.append(url)
-
+    except Exception as e:  # This will catch any unexpected exceptions
+        error_message = f"Unexpected error occurred for URL: {url}. Error: {type(e).__name__} - {str(e)}"
+        print(error_message)
+        the_result = {
+            "url": url,
+            "image_link": "",
+            "white_px_count": 0,
+            "wbi": 0,
+            "error": error_message,
+            "image_size": "N/A",
+            "white_pix_percentage": "N/A"
+        }
+        output.append(the_result)
 df = pd.DataFrame(output, columns=['url', 'image_link', 'white_px_count', 'wbi', 'error', 'image_width', 'image_height', 'white_pix_percentage'])
 
 
