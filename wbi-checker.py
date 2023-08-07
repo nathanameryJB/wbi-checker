@@ -43,6 +43,9 @@ for i, url in enumerate(urls):
     current_progress_text = f"Processing URL {i + 1}/{len(urls)}: {url}"
     my_text.text(current_progress_text)
     my_bar.progress((i + 1) / len(urls))
+    if (i+1 == len(urls)):
+        current_progress_text = f"All images complete!"
+        my_text.text(current_progress_text)
 
     try:
         req = urllib.request.Request(url, headers=headers)
@@ -111,6 +114,7 @@ for i, url in enumerate(urls):
             "white_pix_percentage": "N/A"
         }
         output.append(the_result)
+
 df = pd.DataFrame(output, columns=['url', 'image_link', 'white_px_count', 'wbi', 'error', 'image_width', 'image_height', 'white_pix_percentage'])
 
 
